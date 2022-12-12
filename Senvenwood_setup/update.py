@@ -24,12 +24,21 @@ for line in f.read().split(';'):  # 按照字符：进行划分读取
 
 
 def local_json(update_file):
-    with open("update.json", "r", encoding="utf-8") as f:
+    """
+    :param update_file: 读取本地的json文件
+    :return:读取到的json文件
+    """
+    with open(update_file, "r", encoding="utf-8") as f:
         content = json.loads(f.read())
         return content
 
-
+#读取储存在服务器上的版本信息
 def web_version(content_url, target):
+    """
+    :param content_url: 读取本地的json文件,r_content将读取其中的版本信息地址
+    :param target: 读取目标服务器上的哪一个参数,为了函数复用
+    :return: 返回是完整的读取到的版本地址
+    """
     r_content = requests.get(content_url["version_url"], headers=self_headers, cookies=cookies)
     obj = re.compile(f"{target}&quot;:(?P<vernum>.*?),&#x000A;")
     result = obj.finditer(r_content.text)
@@ -40,6 +49,11 @@ def web_version(content_url, target):
 
 
 def web_download(content_url, target):
+    """
+    :param content_url: 传入本地的json文件,r_content将解析其中的下载地址
+    :param target: 读取目标服务器上的哪一个参数
+    :return: 返回下载地址的前半部分(不包含用户信息)
+    """
     r_content = requests.get(content_url["download_url"], headers=self_headers, cookies=cookies)
     obj = re.compile(f"&quot;{target}&quot;:&quot;(?P<downnum>.*?)\*")
     result = obj.finditer(r_content.text)
@@ -50,6 +64,11 @@ def web_download(content_url, target):
 
 
 def web_download_last(content_url, target):
+    """
+    :param content_url: 传入本地的json文件,r_content将解析其中的下载地址
+    :param target: 读取目标服务器上的哪一个参数
+    :return: 返回下载地址的后半部分(用户信息)
+    """
     r_content = requests.get(content_url["download_url"], headers=self_headers, cookies=cookies)
     obj = re.compile(f"\*(?P<downnum>.*?)&quot;{target}&#x000A;")
     result = obj.finditer(r_content.text)
@@ -78,21 +97,44 @@ def is_updated(old, new):
         updated = True
     return updated
 
-
-def download(url, name):
-    """下载文件
-    :url 网址 str
-    :name 存储名称 str
+def download(url,name, savepath='./'):
     """
-    try:
-        urlretrieve(url, name)
-    except (RuntimeError, ConnectionError):
-        urlretrieve(url, name)
-    dic = ["游戏主文件", "游戏资源文件", "游戏配置文件", "游戏版权信息", "最后合并"]
-    pbar = tqdm(dic)
-    for i in pbar:
-        pbar.set_description("下载进度:" + i)
-        time.sleep(5)
+    download file from internet
+    :param url: 下载路径
+    :param savepath: 文件保存路径
+    :return: None
+    """
+
+    def reporthook(a, b, c):
+        """
+        显示下载进度
+        :param a: 已经下载的数据块
+        :param b: 数据块的大小
+        :param c: 远程文件大小
+        :return: None
+        """
+        print("\rdownloading: %5.1f%%" % (a * b * 100.0 / c), end="")
+
+    #filename = os.path.basename(url)
+    filename = name
+    # 判断文件是否存在，如果不存在则下载
+    if not os.path.isfile(os.path.join(savepath, filename)):
+        # print("Downloading data from %s" % url)
+        try:
+            urlretrieve(url, os.path.join(savepath, filename), reporthook=reporthook)
+        except (RuntimeError, ConnectionError):
+            print("首次链接失效,重新发起请求")
+            try:
+                urlretrieve(url, os.path.join(savepath, filename), reporthook=reporthook)
+            except:
+                print("下载链接已经失效，请重试或者联系作者换源")
+        print("\n下载完成")
+    else:
+        print("文件下载完成")
+    # 获取文件大小
+    filesize = os.path.getsize(os.path.join(savepath, filename))
+    # 文件大小默认以Bytes计， 转换为Mb
+    print('File size = %.2f Mb' % (filesize / 1024 / 1024))
 
 
 def fake_animation(time_self, desc_self):
@@ -101,6 +143,11 @@ def fake_animation(time_self, desc_self):
 
 
 def update():
+    """
+    更新功能的完整代码
+    其中的所有进度条为假进度条
+    :return: 无
+    """
     fake_animation(0.05, "正在启动运行更新程序")
 
     fake_animation(0.5, "读取本地信息文件")
