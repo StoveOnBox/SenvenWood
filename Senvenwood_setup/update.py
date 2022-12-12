@@ -25,7 +25,6 @@ for line in f.read().split(';'):  # 按照字符：进行划分读取
 
 def local_json(update_file):
     """
-
     :param update_file: 读取本地的json文件
     :return:读取到的json文件
     """
@@ -36,7 +35,6 @@ def local_json(update_file):
 #读取储存在服务器上的版本信息
 def web_version(content_url, target):
     """
-
     :param content_url: 读取本地的json文件,r_content将读取其中的版本信息地址
     :param target: 读取目标服务器上的哪一个参数,为了函数复用
     :return: 返回是完整的读取到的版本地址
@@ -52,7 +50,6 @@ def web_version(content_url, target):
 
 def web_download(content_url, target):
     """
-
     :param content_url: 传入本地的json文件,r_content将解析其中的下载地址
     :param target: 读取目标服务器上的哪一个参数
     :return: 返回下载地址的前半部分(不包含用户信息)
@@ -68,7 +65,6 @@ def web_download(content_url, target):
 
 def web_download_last(content_url, target):
     """
-
     :param content_url: 传入本地的json文件,r_content将解析其中的下载地址
     :param target: 读取目标服务器上的哪一个参数
     :return: 返回下载地址的后半部分(用户信息)
@@ -100,17 +96,6 @@ def is_updated(old, new):
     if old < new:
         updated = True
     return updated
-def cbk(downloadedsize,persize,allsize):
-    """
-
-    :param downloadedsize: 已经下载的数据块
-    :param persize:数据块的大小
-    :param allsize:远程文件的大小
-    :return:
-    """
-    perDown = 100.0*downloadedsize*persize/allsize
-    if perDown>100:
-        perDown = 100
 
 def download(url,name, savepath='./'):
     """
@@ -139,10 +124,13 @@ def download(url,name, savepath='./'):
             urlretrieve(url, os.path.join(savepath, filename), reporthook=reporthook)
         except (RuntimeError, ConnectionError):
             print("首次链接失效,重新发起请求")
-            urlretrieve(url, os.path.join(savepath, filename), reporthook=reporthook)
+            try:
+                urlretrieve(url, os.path.join(savepath, filename), reporthook=reporthook)
+            except:
+                print("下载链接已经失效，请重试或者联系作者换源")
         print("\n下载完成")
     else:
-        print("File already exsits!")
+        print("文件下载完成")
     # 获取文件大小
     filesize = os.path.getsize(os.path.join(savepath, filename))
     # 文件大小默认以Bytes计， 转换为Mb
@@ -158,7 +146,6 @@ def update():
     """
     更新功能的完整代码
     其中的所有进度条为假进度条
-
     :return: 无
     """
     fake_animation(0.05, "正在启动运行更新程序")
@@ -255,12 +242,7 @@ def update():
             with open(update_file, "w", encoding="utf-8") as f:
                 print("已写入版本信息")
                 json.dump(content, f, ensure_ascii=False, indent=4)
-        # if updated_self:
-        #     fake_animation(0.2, "正在写入更新程序版本信息")
-        #     content["version_self"] = content_r_self
-        #     with open(update_file, "w", encoding="utf-8") as f:
-        #         print("已写入版本信息")
-        #         json.dump(content, f, ensure_ascii=False, indent=4)
+
 
 
 
