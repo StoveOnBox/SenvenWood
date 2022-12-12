@@ -242,12 +242,7 @@ def update():
             with open(update_file, "w", encoding="utf-8") as f:
                 print("已写入版本信息")
                 json.dump(content, f, ensure_ascii=False, indent=4)
-        # if updated_self:
-        #     fake_animation(0.2, "正在写入更新程序版本信息")
-        #     content["version_self"] = content_r_self
-        #     with open(update_file, "w", encoding="utf-8") as f:
-        #         print("已写入版本信息")
-        #         json.dump(content, f, ensure_ascii=False, indent=4)
+
 
 
 
