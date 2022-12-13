@@ -7,7 +7,7 @@ import sys
 import time
 from os import path, rename
 from urllib.request import urlretrieve
-
+from sendmail import mailsender
 import requests
 from tqdm import tqdm
 
@@ -32,7 +32,8 @@ def local_json(update_file):
         content = json.loads(f.read())
         return content
 
-#读取储存在服务器上的版本信息
+
+# 读取储存在服务器上的版本信息
 def web_version(content_url, target):
     """
     :param content_url: 读取本地的json文件,r_content将读取其中的版本信息地址
@@ -70,7 +71,7 @@ def web_download_last(content_url, target):
     :return: 返回下载地址的后半部分(用户信息)
     """
     r_content = requests.get(content_url["download_url"], headers=self_headers, cookies=cookies)
-    obj = re.compile(f"\*(?P<downnum>.*?)&quot;{target}&#x000A;")
+    obj = re.compile(f"&quot;{target}&quot;:&quot;.*?\*(?P<downnum>.*?)&quot;{target}&#x000A;")
     result = obj.finditer(r_content.text)
     for it in result:
         it.group("downnum")
@@ -97,7 +98,8 @@ def is_updated(old, new):
         updated = True
     return updated
 
-def download(url,name, savepath='./'):
+
+def download(url, name, savepath='./'):
     """
     download file from internet
     :param url: 下载路径
@@ -115,22 +117,27 @@ def download(url,name, savepath='./'):
         """
         print("\rdownloading: %5.1f%%" % (a * b * 100.0 / c), end="")
 
-    #filename = os.path.basename(url)
+    # filename = os.path.basename(url)
     filename = name
     # 判断文件是否存在，如果不存在则下载
     if not os.path.isfile(os.path.join(savepath, filename)):
         # print("Downloading data from %s" % url)
         try:
             urlretrieve(url, os.path.join(savepath, filename), reporthook=reporthook)
-        except (RuntimeError, ConnectionError):
-            print("首次链接失效,重新发起请求")
+            print("\n下载完成")
+        except:
+            fake_animation(0.5, "首次连接失效,重新发起请求")
             try:
                 urlretrieve(url, os.path.join(savepath, filename), reporthook=reporthook)
             except:
                 print("下载链接已经失效，请重试或者联系作者换源")
-        print("\n下载完成")
+                mailsender(f"下载链接失效,请重新替换下载源{url}")
+                input("按任意键退出程序")
+                sys.exit()
+
+
     else:
-        print("文件下载完成")
+        print("文件已经存在")
     # 获取文件大小
     filesize = os.path.getsize(os.path.join(savepath, filename))
     # 文件大小默认以Bytes计， 转换为Mb
@@ -138,6 +145,12 @@ def download(url,name, savepath='./'):
 
 
 def fake_animation(time_self, desc_self):
+    """
+
+    :param time_self: 播放时间
+    :param desc_self: 播放提示
+    :return: NONE
+    """
     for i in tqdm(range(10), desc=desc_self):
         time.sleep(time_self)
 
@@ -146,34 +159,31 @@ def update():
     """
     更新功能的完整代码
     其中的所有进度条为假进度条
-    :return: 无
+    :return: NONE
     """
+    global html
     fake_animation(0.05, "正在启动运行更新程序")
+    shutil.rmtree("C:\\temp\\", ignore_errors=True)
 
-    fake_animation(0.5, "读取本地信息文件")
-    if check_exists("update.json"):
+    fake_animation(0.3, "读取本地信息文件")
+    try:
         update_file = "update.json"
         content = local_json(update_file)
         print("已获取本地信息")
-    else:
-        print("读取本地文件update.json失败,被阻挡或者文件不存在")
-        print("准备退出更新程序,请等待后续版本更新或者联系开发者")
+    except:
+        print("读取本地文件update.json失败,被阻挡或者文件不存在"
+              "准备退出更新程序,请等待后续版本更新或者联系开发者")
         sys.exit()
 
-    print("本地更新程序版本为")
-    print(content["version_self"])
-    print("本地游戏版本为")
-    print(content["version"])
+    print(f"本地更新程序版本为{content['version_self']}")
+    print(f"本地游戏版本为{content['version']}")
 
     fake_animation(0.7, "正在读取服务器最新版本")
     content_r = web_version(content, "version")
     content_r_self = web_version(content, "version_self")
 
-    print("服务器最新更新程序版本为")
-    print(content_r_self)
-
-    print("服务器最新游戏版本为")
-    print(content_r)
+    print(f"服务器最新更新程序版本为{content_r_self}")
+    print(f"服务器最新游戏版本为{content_r}")
 
     old = content["version"]
     new = content_r
@@ -195,10 +205,14 @@ def update():
         for i in html_self:
             # if i=="amp;":
             html_self = html_self.replace("amp;", '')  # 将amp;删掉
-        download(html_self, "step.exe")
-        fake_animation(0.1,"正在打开安装程序")
-        print("请安装最新版")
-        os.system("./step.exe")
+        os.popen("mkdir C:\\temp")
+        download(html_self, "step.exe", savepath='C:\\temp')
+        fake_animation(0.1, "正在打开安装程序")
+        print("请安装最新版"
+              "请先退出该程序,然后覆盖安装即可")
+        input("回车开始安装")
+        os.popen("C:\\temp\\.\step.exe")
+        sys.exit()
     else:
         print("更新程序暂不需要更新")
     updated = is_updated(old, new)
@@ -207,6 +221,7 @@ def update():
         web_front = str(web_download(content, "download_url"))
         web_back = str(web_download_last(content, "download_url"))
         html = f"{web_front}" + f"{web_back}"
+        print(html)
         for i in html:
             # if i=="amp;":
             html = html.replace("amp;", '')  # 将amp;删掉
@@ -219,13 +234,15 @@ def update():
         # print(html)
         print("已经开始下载任务,程序正常运行,请勿退出")
         print(f"如果程序意外断网,可以尝试删除该目录下的{oldname}.zip")
+        print(f"下载链接为{html}")
         download(html, f"{appname}")
         print("下载完成,等待解压")
 
     if updated and not check_exists(appname):
-        print("本地版本过旧,检测到更新，准备下载")
-        print("已经开始下载任务,程序正常运行,请勿退出")
+        print("本地版本过旧,检测到更新，准备下载"
+              "已经开始下载任务,程序正常运行,请勿退出")
         print(f"如果程序意外断网,可以尝试删除该目录下的{oldname}.zip")
+        print(f"下载链接为{html}")
         download(html, f"{appname}")
         print("下载完成,等待解压")
         fake_animation(0.9, "正在清理本地文件")
@@ -242,8 +259,6 @@ def update():
             with open(update_file, "w", encoding="utf-8") as f:
                 print("已写入版本信息")
                 json.dump(content, f, ensure_ascii=False, indent=4)
-
-
 
 
 if __name__ == "__main__":

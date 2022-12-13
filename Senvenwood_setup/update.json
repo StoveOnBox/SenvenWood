@@ -1,7 +1,7 @@
 {
-    "name": ".minecraft",
-    "version": "1.9",
-    "version_self": "1.0",
-    "version_url": "https://gitee.com/dockstobox/MCupdate/blob/master/update.json",
-    "download_url": "https://gitee.com/dockstobox/MCupdate/blob/master/download.json"
+  "name": ".minecraft",
+  "version": "1.10",
+  "version_self": "1.1",
+  "version_url": "https://gitee.com/dockstobox/MCupdate/blob/master/update.json",
+  "download_url": "https://gitee.com/dockstobox/MCupdate/blob/master/download.json"
 }
