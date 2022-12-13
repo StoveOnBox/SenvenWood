@@ -5,6 +5,7 @@ import re
 import shutil
 import sys
 import time
+import platform
 from os import path, rename
 from urllib.request import urlretrieve
 from sendmail import mailsender
@@ -131,7 +132,11 @@ def download(url, name, savepath='./'):
                 urlretrieve(url, os.path.join(savepath, filename), reporthook=reporthook)
             except:
                 print("下载链接已经失效，请重试或者联系作者换源")
-                mailsender(f"下载链接失效,请重新替换下载源{url}")
+                mailsender(f"\n下载链接失效,请重新替换{name}下载源"
+                           f"\n失效的链接为:{url}"
+                           f"\n上报操作系统:{platform.platform()}"
+                           f"\n上报系统版本号:{platform.version()}"
+                           f"\n上报网络信息:{platform.node()}")
                 input("按任意键退出程序")
                 sys.exit()
 
@@ -221,7 +226,6 @@ def update():
         web_front = str(web_download(content, "download_url"))
         web_back = str(web_download_last(content, "download_url"))
         html = f"{web_front}" + f"{web_back}"
-        print(html)
         for i in html:
             # if i=="amp;":
             html = html.replace("amp;", '')  # 将amp;删掉
@@ -234,7 +238,6 @@ def update():
         # print(html)
         print("已经开始下载任务,程序正常运行,请勿退出")
         print(f"如果程序意外断网,可以尝试删除该目录下的{oldname}.zip")
-        print(f"下载链接为{html}")
         download(html, f"{appname}")
         print("下载完成,等待解压")
 

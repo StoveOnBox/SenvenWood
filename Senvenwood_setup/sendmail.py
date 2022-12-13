@@ -3,41 +3,41 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
 
-# smtplibÄ£¿éÖ÷Òª¸ºÔğ·¢ËÍÓÊ¼ş£ºÊÇÒ»¸ö·¢ËÍÓÊ¼şµÄ¶¯×÷£¬Á¬½ÓÓÊÏä·şÎñÆ÷£¬µÇÂ¼ÓÊÏä£¬·¢ËÍÓÊ¼ş£¨ÓĞ·¢¼şÈË£¬ÊÕĞÅÈË£¬ÓÊ¼şÄÚÈİ£©¡£
-# emailÄ£¿éÖ÷Òª¸ºÔğ¹¹ÔìÓÊ¼ş£ºÖ¸µÄÊÇÓÊÏäÒ³ÃæÏÔÊ¾µÄÒ»Ğ©¹¹Ôì£¬Èç·¢¼şÈË£¬ÊÕ¼şÈË£¬Ö÷Ìâ£¬ÕıÎÄ£¬¸½¼şµÈ¡£
+# smtplibæ¨¡å—ä¸»è¦è´Ÿè´£å‘é€é‚®ä»¶ï¼šæ˜¯ä¸€ä¸ªå‘é€é‚®ä»¶çš„åŠ¨ä½œï¼Œè¿æ¥é‚®ç®±æœåŠ¡å™¨ï¼Œç™»å½•é‚®ç®±ï¼Œå‘é€é‚®ä»¶ï¼ˆæœ‰å‘ä»¶äººï¼Œæ”¶ä¿¡äººï¼Œé‚®ä»¶å†…å®¹ï¼‰ã€‚
+# emailæ¨¡å—ä¸»è¦è´Ÿè´£æ„é€ é‚®ä»¶ï¼šæŒ‡çš„æ˜¯é‚®ç®±é¡µé¢æ˜¾ç¤ºçš„ä¸€äº›æ„é€ ï¼Œå¦‚å‘ä»¶äººï¼Œæ”¶ä»¶äººï¼Œä¸»é¢˜ï¼Œæ­£æ–‡ï¼Œé™„ä»¶ç­‰ã€‚
 
 def mailsender(mail_content):
-    host_server = 'smtp.qq.com'  #qqÓÊÏäsmtp·şÎñÆ÷
-    sender_qq = 'dexter_duan@qq.com' #·¢¼şÈËÓÊÏä
+    host_server = 'smtp.qq.com'  #qqé‚®ç®±smtpæœåŠ¡å™¨
+    sender_qq = 'dexter_duan@qq.com' #å‘ä»¶äººé‚®ç®±
     pwd = 'ybdshrvfihmhdccd'
-    receiver = ['dexter_duan@qq.com','dockstobox@gmail.com']#ÊÕ¼şÈËÓÊÏä
-    mail_title = 'SenvenWood±¨¸æ' #ÓÊ¼ş±êÌâ
-    mail_content = "NONE" #ÓÊ¼şÕıÎÄÄÚÈİ
-    # ³õÊ¼»¯Ò»¸öÓÊ¼şÖ÷Ìå
+    receiver = ['dexter_duan@qq.com','dockstobox@gmail.com']#æ”¶ä»¶äººé‚®ç®±
+    mail_title = 'SenvenWoodæŠ¥å‘Š' #é‚®ä»¶æ ‡é¢˜
+    #mail_content #é‚®ä»¶æ­£æ–‡å†…å®¹
+    # åˆå§‹åŒ–ä¸€ä¸ªé‚®ä»¶ä¸»ä½“
     msg = MIMEMultipart()
     msg["Subject"] = Header(mail_title,'utf-8')
     msg["From"] = sender_qq
-    # msg["To"] = Header("²âÊÔÓÊÏä",'utf-8')
+    # msg["To"] = Header("æµ‹è¯•é‚®ç®±",'utf-8')
     msg['To'] = ";".join(receiver)
-    # ÓÊ¼şÕıÎÄÄÚÈİ
+    # é‚®ä»¶æ­£æ–‡å†…å®¹
     msg.attach(MIMEText(mail_content,'plain','utf-8'))
 
 
 
-    smtp = SMTP_SSL(host_server) # sslµÇÂ¼
+    smtp = SMTP_SSL(host_server) # sslç™»å½•
 
     # login(user,password):
-    # user:µÇÂ¼ÓÊÏäµÄÓÃ»§Ãû¡£
-    # password£ºµÇÂ¼ÓÊÏäµÄÃÜÂë£¬¸ÃÊÚÈ¨Âë¼´Îª¿Í»§¶ËÃÜÂë¡£
+    # user:ç™»å½•é‚®ç®±çš„ç”¨æˆ·åã€‚
+    # passwordï¼šç™»å½•é‚®ç®±çš„å¯†ç ï¼Œè¯¥æˆæƒç å³ä¸ºå®¢æˆ·ç«¯å¯†ç ã€‚
     smtp.login(sender_qq,pwd)
 
     # sendmail(from_addr,to_addrs,msg,...):
-    # from_addr:ÓÊ¼ş·¢ËÍÕßµØÖ·
-    # to_addrs:ÓÊ¼ş½ÓÊÕÕßµØÖ·¡£×Ö·û´®ÁĞ±í['½ÓÊÕµØÖ·1','½ÓÊÕµØÖ·2','½ÓÊÕµØÖ·3',...]»ò'½ÓÊÕµØÖ·'
-    # msg£º·¢ËÍÏûÏ¢£ºÓÊ¼şÄÚÈİ¡£Ò»°ãÊÇmsg.as_string():as_string()ÊÇ½«msg(MIMEText¶ÔÏó»òÕßMIMEMultipart¶ÔÏó)±äÎªstr¡£
+    # from_addr:é‚®ä»¶å‘é€è€…åœ°å€
+    # to_addrs:é‚®ä»¶æ¥æ”¶è€…åœ°å€ã€‚å­—ç¬¦ä¸²åˆ—è¡¨['æ¥æ”¶åœ°å€1','æ¥æ”¶åœ°å€2','æ¥æ”¶åœ°å€3',...]æˆ–'æ¥æ”¶åœ°å€'
+    # msgï¼šå‘é€æ¶ˆæ¯ï¼šé‚®ä»¶å†…å®¹ã€‚ä¸€èˆ¬æ˜¯msg.as_string():as_string()æ˜¯å°†msg(MIMETextå¯¹è±¡æˆ–è€…MIMEMultipartå¯¹è±¡)å˜ä¸ºstrã€‚
     smtp.sendmail(sender_qq,receiver,msg.as_string())
 
-    # quit():ÓÃÓÚ½áÊøSMTP»á»°¡£
+    # quit():ç”¨äºç»“æŸSMTPä¼šè¯ã€‚
     smtp.quit()
 
 if __name__ == "__main__":
